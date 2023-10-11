@@ -1,0 +1,427 @@
+Ching別走心
+ching6489
+隱形
+
+旻哲爸爸(宗榮) — 2023/10/10 23:57
+三上
+三下
+PiggyBack — 2023/10/10 23:58
+@王漠井字遊戲
+回家了哦
+王漠井字遊戲 — 2023/10/10 23:59
+?
+PiggyBack — 2023/10/10 23:59
+我朋友說黎明路塞到哭
+王漠井字遊戲 — 2023/10/10 23:59
+早回了 沒塞到
+我爸那邊很熟
+PiggyBack — 2023/10/10 23:59
+有料
+PiggyBack — 昨天 00:03
+今天韓國瑜發文說要藍白合
+ㄏㄏ
+期待一下
+藍得更慘
+藍的15 白的30
+旻哲爸爸(宗榮) — 昨天 00:06
+results.leftHandLandmarks 中的 landmark 是一个数组，其中包含手部关键点的详细信息。每个关键点都有一个索引，从 0 开始，对应于手部的不同部位。每个关键点的坐标信息存储在一个对象中，包含 x 和 y 属性，表示相对于输入图像或视频帧的坐标。
+
+具体而言，results.leftHandLandmarks.landmark 的结构如下：
+
+javascript
+Copy code
+results.leftHandLandmarks.landmark = [
+  { x: x1, y: y1, z: z1 },
+  { x: x2, y: y2, z: z2 },
+  // ... 更多的手部关键点信息
+];
+其中，x1、y1、z1、x2、y2、z2 等等是手部关键点的 x、y 和 z 坐标值。这些坐标值描述了手部关键点在三维空间中的位置。
+
+你可以通过索引访问特定的关键点，例如 results.leftHandLandmarks.landmark[0] 可以得到手部的第一个关键点的详细信息。需要注意的是，z 坐标可能在一些场景中为 undefined，具体取决于模型和检测的场景。
+王漠井 — 昨天 13:18
+@海象o(｀ω´ )o 再傳一次
+王漠井 — 昨天 13:28
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+展開
+message.txt
+6 KB
+王漠井 — 昨天 13:58
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+展開
+message.txt
+6 KB
+海象o(｀ω´ )o — 昨天 14:07
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+展開
+model.html
+5 KB
+我突然想到
+這個undefined會不會是手部關鍵點有一小部分有undefined
+可能缺大拇指部分
+所以landmark.landmark也要檢查
+旻哲爸爸(宗榮) — 昨天 14:18
+Uncaught (in promise) RangeError: byte length of Float32Array should be a multiple of 4
+    at new Float32Array (<anonymous>)
+    at K5 (tfjs:17:246563)
+    at phe (tfjs:17:631268)
+    at tfjs:17:630900
+    at h (tfjs:17:2100)
+    at Generator.<anonymous> (tfjs:17:3441)
+    at Generator.next (tfjs:17:2463)
+    at u (tfjs:17:8324)
+    at o (tfjs:17:8527)
+王漠井 — 昨天 14:19
+這我的那份code
+我把偵測那裏改你的也跳這個
+tf我只叫兩次
+只剩load model沒改過
+海象o(｀ω´ )o — 昨天 14:20
+你把extract keypoint
+let leftHand = Array(21 * 3).fill(0);
+    let rightHand = Array(21 * 3).fill(0);
+concatenatedArray = leftHand.concat(rightHand);
+    return concatenatedArray;
+用這個取代
+看一下模型跑步跑
+王漠井 — 昨天 14:21
+leftHand是學長的python裡的lh嗎
+海象o(｀ω´ )o — 昨天 14:21
+對
+如果學長沒有亂取名字的話
+王漠井 — 昨天 14:22
+function extractKeyPoints(results) {
+            // Initialize empty arrays for left and right hand keypoints
+            let lh = [];
+            let rh = [];
+
+            if (results.leftHandLandmarks) {
+                lh = lh.concat(results.leftHandLandmarks.landmark.map(res => [res.x, res.y, res.z]));
+            } else {
+                // If left hand landmarks are not available, fill with zeros
+                let lh = Array(21 * 3).fill(0);
+            }
+
+            if (results.rightHandLandmarks) {
+                rh = rh.concat(results.rightHandLandmarks.landmark.map(res => [res.x, res.y, res.z]));
+            } else {
+                // If right hand landmarks are not available, fill with zeros
+                let rh = Array(21 * 3).fill(0);
+            }
+
+            // Concatenate left and right hand keypoints arrays
+            concatenatedArray = lh.concat(rh);
+            return concatenatedArray;
+        }
+@旻哲爸爸(宗榮)
+幫
+海象o(｀ω´ )o — 昨天 14:30
+圖片
+抓到了
+王漠井字遊戲 — 昨天 14:47
+int main(int argc, char** argv)
+{
+    String imageName("lena.jpg"); // by default root file path.
+    if (argc > 1)
+    {
+    imageName = argv[1];
+    src = imread(samples::findFile(imageName), IMREAD_COLOR); // Load an image form defualt root file.
+     }
+    if (src.empty())
+    {
+    cout << "Cannot read the image: " << imageName << std::endl;
+    return -1;
+    }
+    cvtColor(src, src_gray, COLOR_BGR2GRAY); // Convert the image to Gray
+    namedWindow(window_name, WINDOW_GUI_NORMAL); // Create a window to display results
+    create Trackbar(trackbar_type, window_name, &threshold_type, max_type, Threshold_Demo);
+    // Create a Trackbar to choose type of Threshold
+    createTrackbar(trackbar_value, window_name, &threshold_value, max_value, Threshold_Demo);
+    // Create a Trackbar to choose Threshold value
+    Threshold_Demo(0, 0); // Call the function to initialize
+    waitKey();
+    destroyAllWindows();
+    return 0;
+} 
+海象o(｀ω´ )o — 昨天 15:00
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+展開
+model.html
+5 KB
+附件檔案類型：archive
+handsmodel.zip
+736.68 KB
+海象o(｀ω´ )o — 昨天 15:22
+@旻哲爸爸(宗榮) 凱瑞我
+我剛上課都沒在聽
+旻哲爸爸(宗榮) — 昨天 15:23
+我也沒在聽
+阿莫carry
+海象o(｀ω´ )o — 今天 00:00
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js" crossorigin="anonymous"></script>
+</head>
+<script>
+  function findindex(x) {
+    let i = 0
+    let max_num = x[0];
+    let max_index=0;
+    for(const i of x){
+        if(x[i]>max_num){
+            max_num = x[i];
+            max_index= i;
+        }
+
+    }
+    return max_index;
+  }
+</script>
+<script>
+  const mylist = ['_', 'can', 'help', 'ma', 'eat','ramen', 'recent'];
+  const actions = mylist;
+  let sequence = [];
+  let predictions = [];
+  const threshold = 0.999;
+
+  async function loadModel() {
+      const model = await tf.loadLayersModel("./handsmodel/model.json");
+      return model;
+  }
+
+  function extractKeyPoints(results) {
+    // 檢查 results.rightHandLandmarks 是否被定義
+    let rightHand=[];
+    let leftHand =[];
+    if (results.rightHandLandmarks) {
+        
+        for (const landmark of results.rightHandLandmarks) {
+    if (landmark) {
+      //  console.log(landmark.x, landmark.y, landmark.z);
+        rightHand.push(landmark.x, landmark.y, landmark.z);
+
+    } else {
+        rightHand.push(0, 0, 0);
+    }
+}
+       // console.log('Right Hand:', rightHand);
+    }else{
+        rightHand=Array(21 * 3).fill(0);
+    }
+    if (results.leftHandLandmarks) {
+        
+        for (const landmark of results.leftHandLandmarks) {
+    if (landmark) {
+      //  console.log(landmark.x, landmark.y, landmark.z);
+        leftHand.push(landmark.x, landmark.y, landmark.z);
+
+    } else {
+        leftHand.push(0, 0, 0);
+    }
+}
+       // console.log('left Hand:', leftHand);
+    }else{
+        leftHand =Array(21 * 3).fill(0);
+    }
+    concatenatedArray = leftHand.concat(rightHand);
+ //  console.log('Hand:', concatenatedArray);
+    return concatenatedArray;
+}
+
+</script>
+<body>
+    <div class="container">
+        <video class="input_video"></video>
+        
+        <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+    </div>
+
+    <script type="module">
+        const videoElement = document.getElementsByClassName('input_video')[0];
+        const canvasElement = document.getElementsByClassName('output_canvas')[0];
+        const canvasCtx = canvasElement.getContext('2d');
+
+        async function onResults(results) {
+    const model = await loadModel();
+        let keypoints = extractKeyPoints(results);
+        sequence.push(keypoints);
+        sequence = sequence.slice(-70);
+        //console.log('s:', sequence);
+        if (sequence.length === 70) {
+            const sequenceTensor = tf.tensor2d(sequence, [70, 126]);
+            const expandedSequence = sequenceTensor.expandDims(0);
+            const prediction = model.predict(expandedSequence);
+            let res = findindex(prediction.dataSync());
+... (還剩 38 行)
+收起
+model.html
+5 KB
+海象o(｀ω´ )o — 今天 00:12
+附件檔案類型：archive
+handsmodel.rar
+742.67 KB
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js" crossorigin="anonymous"></script>
+</head>
+<script>
+  function findindex(x) {
+    let i = 0
+    let max_num = x[0];
+    let max_index=0;
+    for(const i of x){
+        if(x[i]>max_num){
+            max_num = x[i];
+            max_index= i;
+        }
+
+    }
+    return max_index;
+  }
+</script>
+<script>
+  const mylist = ['_', 'can', 'help', 'ma', 'eat','ramen', 'recent'];
+  const actions = mylist;
+  let sequence = [];
+  let predictions = [];
+  const threshold = 0.999;
+
+  async function loadModel() {
+      const model = await tf.loadLayersModel("./handsmodel/model.json");
+      return model;
+  }
+
+  function extractKeyPoints(results) {
+    // 檢查 results.rightHandLandmarks 是否被定義
+    let rightHand=[];
+    let leftHand =[];
+    if (results.rightHandLandmarks) {
+        
+        for (const landmark of results.rightHandLandmarks) {
+    if (landmark) {
+      //  console.log(landmark.x, landmark.y, landmark.z);
+        rightHand.push(landmark.x, landmark.y, landmark.z);
+
+    } else {
+        rightHand.push(0, 0, 0);
+    }
+}
+       // console.log('Right Hand:', rightHand);
+    }else{
+        rightHand=Array(21 * 3).fill(0);
+    }
+    if (results.leftHandLandmarks) {
+        
+        for (const landmark of results.leftHandLandmarks) {
+    if (landmark) {
+      //  console.log(landmark.x, landmark.y, landmark.z);
+        leftHand.push(landmark.x, landmark.y, landmark.z);
+
+    } else {
+        leftHand.push(0, 0, 0);
+    }
+}
+       // console.log('left Hand:', leftHand);
+    }else{
+        leftHand =Array(21 * 3).fill(0);
+    }
+    concatenatedArray = leftHand.concat(rightHand);
+ //  console.log('Hand:', concatenatedArray);
+    return concatenatedArray;
+}
+
+</script>
+<body>
+    <div class="container">
+        <video class="input_video"></video>
+        
+        <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+    </div>
+
+    <script type="module">
+        const videoElement = document.getElementsByClassName('input_video')[0];
+        const canvasElement = document.getElementsByClassName('output_canvas')[0];
+        const canvasCtx = canvasElement.getContext('2d');
+
+        async function onResults(results) {
+    const model = await loadModel();
+        let keypoints = extractKeyPoints(results);
+        sequence.push(keypoints);
+        sequence = sequence.slice(-70);
+        //console.log('s:', sequence);
+        if (sequence.length === 70) {
+            const sequenceTensor = tf.tensor2d(sequence, [70, 126]);
+            const expandedSequence = sequenceTensor.expandDims(0);
+            const prediction = model.predict(expandedSequence);
+            let res = findindex(prediction.dataSync());
+            const predictedAction = actions[prediction.argMax().dataSync()[0]];
+            const predictionArray = prediction.dataSync();
+            const maxValue = Math.max(...predictionArray);
+            const maxIndex = predictionArray.indexOf(maxValue);
+            console.log(mylist[maxIndex]);
+            // const maxIndex = tf.argMax(predictionArray);
+            // const maxValue = predictionArray[maxIndex];
+            // console.log(`Max Index: ${maxIndex}, Max Value: ${maxValue}`);
+
+            //console.log("pred=",prediction.dataSync());
+       //     console.log( res);
+            predictions.push(prediction.argMax().dataSync()[0]);
+        }
+}
+        const holistic = new Holistic({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`
+        });
+        holistic.setOptions({
+            modelComplexity: 0,
+            smoothLandmarks: true,
+            enableSegmentation: true,
+            smoothSegmentation: true,
+            refineFaceLandmarks: false,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+        holistic.onResults(onResults);
+        
+        const camera = new Camera(videoElement, {
+            onFrame: async () => await holistic.send({ image: videoElement }),
+            width: 1280,
+            height: 720
+        });
+        camera.start();
+    </script>
+</body>
+</html>
+model.html
+5 KB
