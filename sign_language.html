@@ -28,13 +28,14 @@
   const actions = mylist;
   let sequence = [];
   let predictions = [];
+  let sentence = [] ;
   const threshold = 0.999;
 
   async function loadModel() {
-      const model = await tf.loadLayersModel("./model.json");
+      const model = await tf.loadLayersModel("./handsmodel/model.json");
       return model;
   }
-
+  
   function extractKeyPoints(results) {
     // 檢查 results.rightHandLandmarks 是否被定義
     let rightHand=[];
@@ -77,8 +78,9 @@
 </script>
 <body>
     <div class="container">
+        <input type="text" id="outputTextbox" readonly>
+        <button id="copyButton">Copy Text</button>
         <video class="input_video"></video>
-        
         <canvas class="output_canvas" width="1280px" height="720px"></canvas>
     </div>
 
@@ -88,7 +90,8 @@
         const canvasCtx = canvasElement.getContext('2d');
 
         async function onResults(results) {
-    const model = await loadModel();
+        var textbox = document.getElementById("outputTextbox");
+        const model = await loadModel();
         let keypoints = extractKeyPoints(results);
         sequence.push(keypoints);
         sequence = sequence.slice(-70);
@@ -97,19 +100,38 @@
             const sequenceTensor = tf.tensor2d(sequence, [70, 126]);
             const expandedSequence = sequenceTensor.expandDims(0);
             const prediction = model.predict(expandedSequence);
-            let res = findindex(prediction.dataSync());
-            const predictedAction = actions[prediction.argMax().dataSync()[0]];
             const predictionArray = prediction.dataSync();
-            const maxValue = Math.max(...predictionArray);
+            const maxValue = Math.max(...predictionArray); //maxvalue是res
             const maxIndex = predictionArray.indexOf(maxValue);
             console.log(mylist[maxIndex]);
-            // const maxIndex = tf.argMax(predictionArray);
-            // const maxValue = predictionArray[maxIndex];
-            // console.log(`Max Index: ${maxIndex}, Max Value: ${maxValue}`);
-
-            //console.log("pred=",prediction.dataSync());
-       //     console.log( res);
-            predictions.push(prediction.argMax().dataSync()[0]);
+            predictions.push(mylist[maxIndex]);
+            const length = predictions.length;
+            const startIndex = Math.max(0, length - 10);
+            let check = false;
+            for (let i = startIndex; i < length; i++) {
+               if(predictions[i]!=mylist[maxIndex]){
+                    check = true
+               }
+               if(check){
+                    break;
+               }
+            }
+            if(!check){
+                    if(maxValue>threshold){
+                        if(sentence.length>0){
+                            if (mylist[maxIndex] !== sentence[sentence.length - 1]) {
+                                sentence.push(mylist[maxIndex]);  
+                            }
+                        }else{
+                            sentence.push(mylist[maxIndex]);
+                        }
+                    }
+            }
+            if (sentence.length > 5) {
+                sentence = sentence.slice(-5);
+            }
+            console.log(sentence);
+            textbox.value = sentence;
         }
 }
         const holistic = new Holistic({
@@ -132,6 +154,30 @@
             height: 720
         });
         camera.start();
+    </script>
+    <script>
+        document.getElementById("copyButton").addEventListener("click", function() {
+            // Get the text to copy from the input field
+            var text = document.getElementById("outputTextbox").value;
+
+            // Create a temporary input element to copy the text
+            var tempInput = document.createElement("input");
+            tempInput.value = text;
+
+            // Append the input element to the document
+            document.body.appendChild(tempInput);
+
+            // Select the text in the input element
+            tempInput.select();
+
+            // Copy the selected text to the clipboard
+            document.execCommand("copy");
+
+            // Remove the temporary input element
+            document.body.removeChild(tempInput);
+
+            alert("Text copied to clipboard: " + text);
+        });
     </script>
 </body>
 </html>
