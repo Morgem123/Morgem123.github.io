@@ -138,11 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </body>
 </html>
-<style>
-  .input_video {
-    display: none; /* 或者使用 visibility: hidden; */
-  }
-</style>
 <script type="module">
     const videoElement = document.getElementsByClassName('input_video')[0];
     const canvasElement = document.getElementsByClassName('output_canvas')[0];
@@ -200,24 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             canvasCtx.save();
      
-  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-  canvasCtx.drawImage(
-      results.image, 0, 0, canvasElement.width, canvasElement.height);
-      canvasCtx.fillStyle="#75b7e3"
-      canvasCtx.fillRect(0,0,canvasElement.width,80)
-      canvasCtx.font = '40px Arial';
-      canvasCtx.fillStyle = 'black';
-      canvasCtx.fillText(sentence.join(''), 15, 50);
   if (results.multiHandLandmarks) {
-    for (const landmarks of results.multiHandLandmarks) {
-      drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS,
-                     {color: '#00FF00', lineWidth: 5});
-      drawLandmarks(canvasCtx, landmarks, {color: '#FF0000', lineWidth: 2});
-    }
   }
-  canvasCtx.restore();
          //   console.log(results);
-          textbox.value = sentence;
+          textbox.value = sentence.join('');
         }
     }
     
