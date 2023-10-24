@@ -19,7 +19,7 @@
   let model;
 
 async function loadModel() {
-  model = await tf.loadLayersModel("./model.json");
+  model = await tf.loadLayersModel("./handsmodel/model.json");
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   canvasCtx.restore();
          //   console.log(results);
-          textbox.value = sentence.join('');
+          textbox.value = sentence;
         }
     }
     
