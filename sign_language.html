@@ -190,7 +190,7 @@
   }
 
   const hands = new Hands({
-    locateFile: (file) => https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
   });
 
   hands.setOptions({
@@ -227,9 +227,6 @@
     document.execCommand("copy");
     document.body.removeChild(tempInput);
     alert("Text copied to clipboard: " + text);
-  });
-</script>
-</html>
   });
 </script>
 </html>
