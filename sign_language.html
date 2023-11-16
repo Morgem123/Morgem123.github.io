@@ -151,7 +151,7 @@
         const predictionTensor = tf.tensor1d(prediction.dataSync());
         const maxIndex = tf.argMax(predictionTensor).dataSync()[0];
         const maxValue = predictionTensor.dataSync()[maxIndex];
-        //console.log(mylist[maxIndex]);
+        console.log(mylist[maxIndex]);
         predictions.push(mylist[maxIndex]);
         if (sentence.length > 70) {
           sentence = sentence.slice(-70);
