@@ -10,123 +10,117 @@
 </head>
 <script>
   const mylist = ['_', '能夠', '幫助', '嗎', '吃','拉麵', '最近'];
-  //const mylist = [' ', '我', '手機', '不見', '不','嗎','除了','申請','信用卡','想','幫忙','能夠'];
-  const actions = mylist;
   let sequence = [];
   let predictions = [];
   let sentence = [] ;
   const threshold = 0.999;
   let model;
 
-async function loadModel() {
-  model = await tf.loadLayersModel("./model.json");
-}
+  async function loadModel() {
+    model = await tf.loadLayersModel("./handsmodel/model.json");
+  }
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadModel();
-});
+  document.addEventListener('DOMContentLoaded', () => {
+    loadModel();
+  });
 
   function extractKeyPoints(result) {
-  let rightHand = [];
-  let leftHand = [];
-  let leftcheck = 0,
-    rightcheck = 0;
+    let rightHand = [];
+    let leftHand = [];
+    let leftcheck = 0,
+      rightcheck = 0;
 
-
-  for (let i = 0; i < result.multiHandLandmarks.length; ++i) {
-    // 只讀到一隻手 1右或1左 讀兩隻 兩右 兩左 一右一左
-    if (result.multiHandedness[i].label=="Left") {
-    //    console.log("left");
-      leftcheck++;
-    }
-    if (result.multiHandedness[i].label=="Right") {
-     //   console.log("Right");
-      rightcheck++;
-    }
-  }
-
-  if (leftcheck === 1 && rightcheck === 1) {
     for (let i = 0; i < result.multiHandLandmarks.length; ++i) {
-      const isLeftHand = result.multiHandedness[i].label === 'Left';
-      const handLandmarks = result.multiHandLandmarks[i];
-
-      if (isLeftHand) {
-        for (const landmark of handLandmarks) {
-          if (landmark !== null) {
-            const x = landmark.x;
-            const y = landmark.y;
-            const z = landmark.z;
-            leftHand.push(x, y, z);
-          } else {
-            leftHand.push(0.0, 0.0, 0.0);
-          }
-        }
-      } else {
-        for (const landmark of handLandmarks) {
-          if (landmark !== null) {
-            const x = landmark.x;
-            const y = landmark.y;
-            const z = landmark.z;
-            rightHand.push(x, y, z);
-          } else {
-            rightHand.push(0.0, 0.0, 0.0);
-          }
-        }
+      if (result.multiHandedness[i].label=="Left") {
+        leftcheck++;
+      }
+      if (result.multiHandedness[i].label=="Right") {
+        rightcheck++;
       }
     }
 
-    const concatenatedArray = rightHand.concat(leftHand);
-    return concatenatedArray;
-  } else if (leftcheck === 2 || rightcheck === 2) {
-    const allHandPoints = [];
-    for (let i = 0; i < result.multiHandLandmarks.length; ++i) {
+    if (leftcheck === 1 && rightcheck === 1) {
+      for (let i = 0; i < result.multiHandLandmarks.length; ++i) {
+        const isLeftHand = result.multiHandedness[i].label === 'Left';
         const handLandmarks = result.multiHandLandmarks[i];
 
-      for (const landmark of handLandmarks) {
-        if (landmark !== null) {
+        if (isLeftHand) {
+          for (const landmark of handLandmarks) {
+            if (landmark !== null) {
+              const x = landmark.x;
+              const y = landmark.y;
+              const z = landmark.z;
+              leftHand.push(x, y, z);
+            } else {
+              leftHand.push(0.0, 0.0, 0.0);
+            }
+          }
+        } else {
+          for (const landmark of handLandmarks) {
+            if (landmark !== null) {
+              const x = landmark.x;
+              const y = landmark.y;
+              const z = landmark.z;
+              rightHand.push(x, y, z);
+            } else {
+              rightHand.push(0.0, 0.0, 0.0);
+            }
+          }
+        }
+      }
+
+      const concatenatedArray = rightHand.concat(leftHand);
+      return concatenatedArray;
+    } else if (leftcheck === 2 || rightcheck === 2) {
+      const allHandPoints = [];
+      for (let i = 0; i < result.multiHandLandmarks.length; ++i) {
+        const handLandmarks = result.multiHandLandmarks[i];
+
+        for (const landmark of handLandmarks) {
+          if (landmark !== null) {
             const x = landmark.x;
             const y = landmark.y;
             const z = landmark.z;
-          allHandPoints.push(x, y, z);
-        } else {
-          allHandPoints.push(0.0, 0.0, 0.0);
+            allHandPoints.push(x, y, z);
+          } else {
+            allHandPoints.push(0.0, 0.0, 0.0);
+          }
         }
       }
-    }
-    return allHandPoints;
-  } else if (leftcheck === 1 && rightcheck === 0) {
-    const handLandmarks = result.multiHandLandmarks[0];
-    for (const landmark of handLandmarks) {
-      if (landmark !== null) {
-        const x = landmark.x;
-            const y = landmark.y;
-            const z = landmark.z;
-        leftHand.push(x, y, z);
-      } else {
-        leftHand.push(0.0, 0.0, 0.0);
+      return allHandPoints;
+    } else if (leftcheck === 1 && rightcheck === 0) {
+      const handLandmarks = result.multiHandLandmarks[0];
+      for (const landmark of handLandmarks) {
+        if (landmark !== null) {
+          const x = landmark.x;
+          const y = landmark.y;
+          const z = landmark.z;
+          leftHand.push(x, y, z);
+        } else {
+          leftHand.push(0.0, 0.0, 0.0);
+        }
       }
-    }
-    rightHand = Array.from({ length: 63 }, () => 0.0);
-    const concatenatedArray = rightHand.concat(leftHand);
-    return concatenatedArray;
-  } else if (leftcheck === 0 && rightcheck === 1) {
-    const handLandmarks = result.multiHandLandmarks[0];
-    for (const landmark of handLandmarks) {
-      if (landmark !== null) {
-        const x = landmark.x;
-            const y = landmark.y;
-            const z = landmark.z;
-        rightHand.push(x, y, z);
-      } else {
-        rightHand.push(0.0, 0.0, 0.0);
+      rightHand = Array.from({ length: 63 }, () => 0.0);
+      const concatenatedArray = rightHand.concat(leftHand);
+      return concatenatedArray;
+    } else if (leftcheck === 0 && rightcheck === 1) {
+      const handLandmarks = result.multiHandLandmarks[0];
+      for (const landmark of handLandmarks) {
+        if (landmark !== null) {
+          const x = landmark.x;
+          const y = landmark.y;
+          const z = landmark.z;
+          rightHand.push(x, y, z);
+        } else {
+          rightHand.push(0.0, 0.0, 0.0);
+        }
       }
+      leftHand = Array.from({ length: 63 }, () => 0.0);
+      const concatenatedArray = rightHand.concat(leftHand);
+      return concatenatedArray;
     }
-    leftHand = Array.from({ length: 63 }, () => 0.0);
-    const concatenatedArray = rightHand.concat(leftHand);
-    return concatenatedArray;
+    return Array.from({ length: 126 }, () => 0.0);
   }
-  return Array.from({ length: 126 }, () => 0.0);
-}
 </script>
 <body>
   <div class="container">
@@ -139,110 +133,100 @@ document.addEventListener('DOMContentLoaded', () => {
 </body>
 </html>
 <script type="module">
-    const videoElement = document.getElementsByClassName('input_video')[0];
-    const canvasElement = document.getElementsByClassName('output_canvas')[0];
-    const canvasCtx = canvasElement.getContext('2d');
-    
- async function onResults(results) {
+  const videoElement = document.getElementsByClassName('input_video')[0];
+  const canvasElement = document.getElementsByClassName('output_canvas')[0];
+  const canvasCtx = canvasElement.getContext('2d');
+  
+  async function onResults(results) {
     var textbox = document.getElementById("outputTextbox");
-        let keypoints = extractKeyPoints(results);
-      //  console.log('kp:', keypoints);
-        sequence.push(keypoints);
-        sequence = sequence.slice(-70);
-        //console.log('s:', sequence);
-        if (sequence.length === 70) {
-            const sequenceTensor = tf.tensor2d(sequence, [70, 126]);
-       //     console.log(sequenceTensor);
-            const expandedSequence = sequenceTensor.expandDims(0);
-         //   console.log(expandedSequence);
-            if(model)
-            {
-              const prediction = model.predict(expandedSequence);
-     //     console.log(prediction);
-            const predictionTensor = tf.tensor1d(prediction.dataSync()); // 将数组转为张量
-          //  console.log(predictionTensor);
-            const maxIndex = tf.argMax(predictionTensor).dataSync()[0];
-        //    console.log(maxIndex);
-            const maxValue = predictionTensor.dataSync()[maxIndex];
-        //    console.log(maxValue);
-            console.log(mylist[maxIndex]);
-            predictions.push(mylist[maxIndex]);
-            if (sentence.length > 70) {
-                sentence = sentence.slice(-70);
-            }
-            const length = predictions.length;
-            const startIndex = Math.max(0, length - 10);
-            let check = false;
-            for (let i = startIndex; i < length; i++) {
-               if(predictions[i]!=mylist[maxIndex]){
-                    check = true
-               }
-               if(check){
-                    break;
-               }
-            }
-            if(!check){
-                    if(maxValue>threshold){
-                        if(sentence.length>0){
-                            if (mylist[maxIndex] !== sentence[sentence.length - 1]) {
-                                sentence.push(mylist[maxIndex]);  
-                            }
-                        }else{
-                            sentence.push(mylist[maxIndex]);
-                        }
-                    }
-            }
-            }
-            canvasCtx.save();
-     
-  if (results.multiHandLandmarks) {
-  }
-         //   console.log(results);
-          textbox.value = sentence.join('');
+    let keypoints = extractKeyPoints(results);
+    sequence.push(keypoints);
+    sequence = sequence.slice(-70);
+    if (sequence.length === 70) {
+      const sequenceTensor = tf.tensor2d(sequence, [70, 126]);
+      const expandedSequence = sequenceTensor.expandDims(0);
+      if(model)
+      {
+        const prediction = model.predict(expandedSequence);
+        const predictionTensor = tf.tensor1d(prediction.dataSync());
+        const maxIndex = tf.argMax(predictionTensor).dataSync()[0];
+        const maxValue = predictionTensor.dataSync()[maxIndex];
+        //console.log(mylist[maxIndex]);
+        predictions.push(mylist[maxIndex]);
+        if (sentence.length > 70) {
+          sentence = sentence.slice(-70);
         }
+        const length = predictions.length;
+        const startIndex = Math.max(0, length - 10);
+        let check = false;
+        for (let i = startIndex; i < length; i++) {
+          if(predictions[i]!=mylist[maxIndex]){
+            check = true;
+          }
+          if(check){
+            break;
+          }
+        }
+        if(!check){
+          if(maxValue>threshold){
+            if(sentence.length>0){
+              if (mylist[maxIndex] !== sentence[sentence.length - 1]) {
+                sentence.push(mylist[maxIndex]);  
+              }
+            } else {
+              sentence.push(mylist[maxIndex]);
+            }
+          }
+        }
+      }
+      canvasCtx.save();
+
+      if (results.multiHandLandmarks) {
+        // Your logic for handling multiHandLandmarks if needed
+      }
+
+      textbox.value = sentence.join('');
     }
-    
-    const hands = new Hands({locateFile: (file) => {
-      return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-    }});
-    hands.setOptions({
-      maxNumHands: 2,
-      modelComplexity: 0,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5
-    });
-    hands.onResults(onResults);
-    
-    const camera = new Camera(videoElement, {
-      onFrame: async () => {
-        await hands.send({image: videoElement});
-      },
-      width: 1280,
-      height: 720
-    });
-    camera.start();
-    </script>
-        <script>
-            document.getElementById("copyButton").addEventListener("click", function() {
-                // Get the text to copy from the input field
-                var text = document.getElementById("outputTextbox").value;
-    
-                // Create a temporary input element to copy the text
-                var tempInput = document.createElement("input");
-                tempInput.value = text;
-    
-                // Append the input element to the document
-                document.body.appendChild(tempInput);
-    
-                // Select the text in the input element
-                tempInput.select();
-    
-                // Copy the selected text to the clipboard
-                document.execCommand("copy");
-    
-                // Remove the temporary input element
-                document.body.removeChild(tempInput);
-    
-                alert("Text copied to clipboard: " + text);
-            });
-        </script>
+  }
+
+  const hands = new Hands({
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+  });
+
+  hands.setOptions({
+    maxNumHands: 2,
+    modelComplexity: 0,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+  });
+
+  hands.onResults(onResults);
+
+  const cameraOptions = {
+    width: 1280,
+    height: 720,
+    facingMode: 'environment', // Use the rear camera
+  };
+
+  const camera = new Camera(videoElement, {
+    onFrame: async () => {
+      await hands.send({image: videoElement});
+    },
+    ...cameraOptions,
+  });
+
+  camera.start();
+</script>
+<script>
+  document.getElementById("copyButton").addEventListener("click", function() {
+    var text = document.getElementById("outputTextbox").value;
+    var tempInput = document.createElement("input");
+    tempInput.value = text;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand("copy");
+    document.body.removeChild(tempInput);
+    alert("Text copied to clipboard: " + text);
+  });
+</script>
+</html>
